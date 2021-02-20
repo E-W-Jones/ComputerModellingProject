@@ -74,7 +74,7 @@ class Particle3D(object):
         Kinetic energy, a float.
 
         """
-        return self.mass*np.dot(self.vel, self.vel)/2
+        return self.mass * np.dot(self.vel, self.vel) / 2
 
     def linear_momentum(self):
         """
@@ -85,7 +85,7 @@ class Particle3D(object):
         The linear momentum as a numpy array.
 
         """
-        return self.mass*self.vel
+        return self.mass * self.vel
 
     def velocity_step(self, dt, force):
         """
@@ -99,7 +99,7 @@ class Particle3D(object):
         force : Force vector, either as a numpy array
 
         """
-        self.vel += dt*force/self.mass
+        self.vel += dt * force / self.mass
 
     def position_step(self, dt, force):
         """
@@ -115,7 +115,7 @@ class Particle3D(object):
         force : Force vector, either as a numpy array
 
         """
-        self.pos += dt*self.vel + dt*dt*force/(2*self.mass)
+        self.pos += dt*self.vel + dt*dt*force / (2*self.mass)
 
     # Static Methods
     @staticmethod

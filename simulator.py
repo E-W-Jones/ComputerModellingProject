@@ -153,7 +153,7 @@ def main():
     trajectory_file.write(solar_system.xyz(f"time = {time}"))
     solar_system.get_pair_separations()
     forces = solar_system.gravitational_force(G)
-    energy[0] = [time, solar_system.total_energy(G)]
+    energy[0] = time, solar_system.total_energy(G)
 
     orbital_distance[0] = solar_system.sep_mags[orbits_measured_from,
                                                 range(1, solar_system.N)]
@@ -180,8 +180,8 @@ def main():
         # and trajectory file
         orbital_distance[i+1] = solar_system.sep_mags[orbits_measured_from,
                                                       range(1, solar_system.N)]
-        # Calculate energy:
-        energy[i+1] = [time, solar_system.total_energy(G)]
+        # Calculate and store energy:
+        energy[i+1] = time, solar_system.total_energy(G)
 
         # Chose to use i+1 instead of i because we store the values at
         # time = 0 and want to count from that, else we're actually doing:
@@ -199,4 +199,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
