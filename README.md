@@ -4,6 +4,7 @@ Computer Modelling Project A Solar System
 Describes an N-body system interacting through Newtonian gravity.
 
 Units are kilograms, astronomical units, and days.
+The derived units for force and energy are kg⋅au⋅day^-2 and kg⋅au^2⋅day^-2.
 
 ## Inputs
 ### Command Line
@@ -13,7 +14,7 @@ The names of:
 3. The file the trajectory data are to be written to
 4. The file the observables (like apsides, orbital periods) are to be written to.
 
-Should look like: `python simulation.py parameters.txt particles.txt trajectory.xyz observables.txt`
+Should look like: `python simulator.py parameters.txt particles.txt trajectory.xyz observables.txt`
 ### Simulation Parameters
 A file with the following structure
 ```
