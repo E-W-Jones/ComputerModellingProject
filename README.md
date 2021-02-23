@@ -75,3 +75,10 @@ The simulation parameters file:
     iter_for_output   : 5
     body_orbits       : 0, 1
 ```
+
+## Outputs
+### Trajectory File
+
+### Observables
+
+### Energy
