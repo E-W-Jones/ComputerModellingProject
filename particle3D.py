@@ -115,30 +115,24 @@ class Particle3D(object):
         force : Force vector, either as a numpy array
 
         """
-        self.pos += dt*self.vel + dt*dt*force / (2*self.mass)
+        self.pos += dt * self.vel + dt * dt * force / (2 * self.mass)
 
     # Static Methods
     @staticmethod
-    def total_KE(*particles):
+    def total_KE(particles):
         """
         Calculate total kinetic energy of all the particles in the list.
 
         Parameters
         ----------
-        particles : Either a list of particle3D objects, or several particle3D
-        objects.
+        particles : A list of particle3D objects
 
         Returns
         -------
         Total KE, a float
 
         """
-        # If several objects are input {i.e. total_KE(p1, p2, p3)}:
-        try:
-            return sum([particle.kinetic_energy() for particle in particles])
-        # If one list of objects is input {i.e. total_KE([p1, p2, p3])}:
-        except AttributeError:
-            return sum([part.kinetic_energy() for part in particles[0]])
+        return sum([particle.kinetic_energy() for particle in particles])
 
     @staticmethod
     def totalmass_comvelocity(particle_list):

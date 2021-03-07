@@ -1,5 +1,0 @@
-no_of_iterations  : 36500
-timestep          : 1
-no_of_bodies      : 12
-iter_for_output   : 1
-body_orbits       : 0,0,0,3,0,0,0,0,0,0,0

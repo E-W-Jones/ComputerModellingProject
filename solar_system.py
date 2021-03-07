@@ -153,18 +153,21 @@ class SolarSystem():
 
         """
         mimj = self.mass_products
-        rij_mag = self.sep_mags + np.eye(self.N)
-        # Adding the identity matrix to avoid division by 0.
-        # Division by zero would happen for ri = rj,
-        # which is when the ith and jth body are representing the same body.
+        # An array where each element is the reciprocal of self.sep_mags
+        recip_r = np.divide(1, self.sep_mags, where=(self.sep_mags != 0),
+                            out=np.zeros_like(self.sep_mags))
+        # This is done to avoid division by 0, which would happen where ri=rj.
+        # This is when the ith and jth body represent the same body.
         # There is no physical potential or force felt on a body by itself,
-        # it doesn't matter what the value is, so no harm in changing it to 1.
-        U_ij = -1 * G * mimj / rij_mag
-        # An array where each element is the potential energy a body has
-        # Not a necessary step, but useful for troubleshooting
-        U_i = np.sum(U_ij, axis=1)
+        # so set it to 0, as this means we can sum over the array.
+
+        U_ij = -1 * G * mimj * recip_r
+        # This array has the potential each body feels due to each other body,
+        # but this actually overcounts the potential as two bodies do not each
+        # feel a potential, they share a potential caused by both.
+
         # The total gravitational potential of the system
-        U_total = np.sum(U_i)
+        U_total = np.sum(U_ij) / 2  # U_ij overcounts by a factor of 2
         return U_total
 
     def gravitational_force(self, G):
@@ -189,17 +192,17 @@ class SolarSystem():
         An array of the forces acting on the i-th particle; [F_1, F_2, ...]
 
         """
+        rij = self.sep_vecs
         # Add another dimension to scalars so can be broadcast with vectors
         mimj = self.mass_products[:, :, np.newaxis]
-        rij_mag = (self.sep_mags + np.eye(self.N))[:, :, np.newaxis]
-
-        rij = self.sep_vecs
-        # Adding the identity matrix to avoid division by 0.
-        # Division by zero would happen for ri = rj,
-        # which is when the ith and jth body are representing the same body.
+        # An array where each element is the reciprocal of self.sep_mags
+        recip_r = np.divide(1, self.sep_mags, where=(self.sep_mags != 0),
+                            out=np.zeros_like(self.sep_mags))[:, :, np.newaxis]
+        # This is done to avoid division by 0, which would happen where ri=rj.
+        # This is when the ith and jth body represent the same body.
         # There is no physical potential or force felt on a body by itself,
-        # it doesn't matter what the value is, sono harm in changing it to 1.
-        F_ij = G * mimj / rij_mag**3 * rij
+        # so set it to 0, as this means we can sum over the array.
+        F_ij = G * mimj * recip_r**3 * rij
         # An array where each element is the total force acting on a body
         F_i = np.sum(F_ij, axis=1)
         return F_i
@@ -259,5 +262,4 @@ class SolarSystem():
         """
         kinetic = Particle3D.total_KE(self.bodies)
         potential = self.gravitational_potential(G)
-        return kinetic + potential
-
+        return kinetic, potential, kinetic + potential

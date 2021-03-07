@@ -5,15 +5,16 @@ Computer Modelling Project A: Solar System
 
 Uses velocity verlet integration to model a system of planets
 acting under Newtonian gravity.
+
+See README for information about I/O.
 """
 import sys
 import numpy as np
-from particle3D import Particle3D
 from solar_system import SolarSystem as SolSys
 from scipy.signal import find_peaks
 
 
-# Constants
+# --- Constants ---
 DAY = 86400  # seconds
 
 # from NASA - https://cneos.jpl.nasa.gov/glossary/au.html
@@ -98,7 +99,7 @@ def save_observables(fname, orbital_distances, dt, system, delimiter=','):
     delimiter : Optional. The delimiter for the file, by default is a comma.
 
     """
-    temp_array = [['name', 'orbital_period (days)', 'periapsis (au)', 'error',
+    data_array = [['name', 'orbital_period (days)', 'periapsis (au)', 'error',
                    'apoapsis (au)', 'error']]
     names = []
     for body in system.bodies:
@@ -108,16 +109,14 @@ def save_observables(fname, orbital_distances, dt, system, delimiter=','):
     N = len(names)
 
     body_distances = orbital_distances.T
-    temp_list = [calculate_observables(body_distances[i], dt) for i in range(N)]
 
     for i in range(N):
-        temp_array.append([names[i]] + calculate_observables(body_distances[i], dt))
-    array_to_save = np.array(temp_array)
-    np.savetxt(fname, temp_array, delimiter=delimiter, fmt='%s')
+        data_array.append([names[i]] + calculate_observables(body_distances[i], dt))
+    np.savetxt(fname, data_array, delimiter=delimiter, fmt='%s')
 
 
 def main():
-    # Check and read data from command line arguments
+    # --- Check and read data from command line arguments ---
     if len(sys.argv) != 5:
         print(("Not enough command line arguments given, there should be 4:\n"
                "a parameter file, a file with the celestial bodies' "
@@ -137,63 +136,62 @@ def main():
         n = int(params[3])
         orbits_measured_from = [int(x) for x in params[4].split(",")]
 
-    # Initialise Solar System, correct for centre of mass drift
+    # --- Initialise Solar System ---
     solar_system = SolSys(bodies_fname, no_of_bodies)
     solar_system.com_correct()
 
-    # Open the trajectory file and create arrays to store energy and
-    # orbital distances; the distance from the primary body to the secondary
+    # --- Initialise data arrays ---
+    # Open the trajectory file and create arrays to store energies and
+    # orbital distances (the distance from the primary body to the secondary)
+    # Energy array has columns: time, kinetic, potential, total energy.
     trajectory_file = open(traj_fname, "w")
-    energy = np.zeros((num_of_steps + 1, 2), dtype=float)
+    energy = np.zeros((num_of_steps + 1, 4), dtype=float)
     orbital_distance = np.zeros((num_of_steps + 1, no_of_bodies - 1),
-                                 dtype=float)
+                                dtype=float)
 
+    # --- Time Integrator ---
     # Calculate forces at time=0, save energy, orbital distances, and positions
     time = 0
     trajectory_file.write(solar_system.xyz(f"time = {time}"))
     solar_system.get_pair_separations()
     forces = solar_system.gravitational_force(G)
-    energy[0] = time, solar_system.total_energy(G)
+    energy[0] = time, *solar_system.total_energy(G)
 
     orbital_distance[0] = solar_system.sep_mags[orbits_measured_from,
                                                 range(1, solar_system.N)]
 
     # Start integrating
     for i in range(num_of_steps):
-        # Update particle positions
         solar_system.update_position(dt, forces)
-        # Calculate new force, and average force
         solar_system.get_pair_separations()
+
         new_forces = solar_system.gravitational_force(G)
 
         avg_forces = (forces + new_forces) / 2
 
-        # Update particle velocities
         solar_system.update_velocity(dt, avg_forces)
 
         # Updating the force variables for the next timestep
         forces = new_forces
-        # Increase time
+
         time += dt
 
-        # Update data frames with new separation and energy values
-        # and trajectory file
+        # --- Writing Data ---
+        # Update distances data array
         orbital_distance[i+1] = solar_system.sep_mags[orbits_measured_from,
                                                       range(1, solar_system.N)]
-        # Calculate and store energy:
-        energy[i+1] = time, solar_system.total_energy(G)
-
-        # Chose to use i+1 instead of i because we store the values at
-        # time = 0 and want to count from that, else we're actually doing:
-        #    0, time=dt, then count from time=dt
+        # Update trajctory file and energies every nth timestep
+        # Use i+1 so that counting starts from t=0 not t=dt
         if (i + 1) % n == 0:
             # Output particle positions
             trajectory_file.write(solar_system.xyz(f"time = {time}"))
+            # Calculate and store energy
+            energy[i + 1] = time, *solar_system.total_energy(G)
 
-
-    # Close trajectory file, save energies (only every nth row)
+    # --- Saving Data ---
+    # Close trajectory file, save energies, calculate and save observables
     trajectory_file.close()
-    np.savetxt("energy.txt", energy[::n])
+    np.savetxt("energy.txt", energy[::n], delimiter=",")
     save_observables(obs_fname, orbital_distance, dt, solar_system)
 
 
