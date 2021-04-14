@@ -12,7 +12,7 @@ import sys
 import numpy as np
 from solar_system import SolarSystem as SolSys
 from scipy.signal import find_peaks
-
+from tqdm import trange
 
 # --- Constants ---
 DAY = 86400  # seconds
@@ -161,7 +161,7 @@ def main():
                                                 range(1, solar_system.N)]
 
     # Start integrating
-    for i in range(num_of_steps):
+    for i in trange(num_of_steps):
         solar_system.update_position(dt, forces)
         solar_system.get_pair_separations()
 
