@@ -4,7 +4,7 @@ Computer Modelling Project A Solar System
 Describes an N-body system interacting through Newtonian gravity.
 
 Units are kilograms, astronomical units, and days.
-The derived units for force and energy are kg⋅au⋅day^-2^ and kg⋅au^2^⋅day^-2^.
+The derived units for force and energy are kg⋅au⋅day^-2 and kg⋅au^2⋅day^-2.
 
 ## Structure
 
